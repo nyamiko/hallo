@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>ファイルアップロード</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">アップロード</button>
+    </form>
+
+    <hr>
+
+    <h2>アップロード済みファイル一覧</h2>
+    {% for file in files %}
+        <div>
+            <p><strong>ファイル名:</strong> <a href="{{ file.file.url }}">{{ file.file.name }}</a></p>
+            <p><strong>説明:</strong> {{ file.description }}</p>
+            <p><strong>アップロード者:</strong> {{ file.uploaded_by.username }}</p>
+            <p><strong>日時:</strong> {{ file.uploaded_at }}</p>
+            <hr>
+        </div>
+    {% empty %}
+        <p>まだファイルがアップロードされていません。</p>
+    {% endfor %}
+{% endblock %}
