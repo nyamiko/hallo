@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'fileshare', # --- ★追加
+    'fileshare', # ★ 追加
 ]
 
 MIDDLEWARE = [
@@ -134,3 +134,4 @@ MEDIA_URL = '/media/'
 
 # メディアファイルの物理的な保存場所 (プロジェクトルートの 'media' フォルダ)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

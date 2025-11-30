@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="{% url 'file_list' %}" class="link-primary">← ファイル一覧に戻る</a>
+    <h4 class="mt-4 mb-2">ファイル: {{ file.file.name }}</h4>
+    <div><strong>説明:</strong> {{ file.description }}</div>
+    <div><strong>ユーザー:</strong> {{ file.uploaded_by.username }}</div>
+    <div class="mt-2 mb-2">
+        <a href="{% url 'file_download' file.pk %}" class="btn btn-outline-primary">ファイルをダウンロード</a>
+    </div>
+
+    <hr>
+    
+    <h4 class="mt-5 mb-3">コメント ({{ comments.count }})</h4>
+    
+    {% for comment in comments %}
+        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+            <p><strong>{{ comment.user.username }}</strong> が {{ comment.created_at|date:"Y/m/d H:i" }} にコメント:</p>
+            <p>{{ comment.text|linebreaksbr }}</p>
+        </div>
+    {% empty %}
+        <p>まだコメントはありません。</p>
+    {% endfor %}
+
+    <h4>コメントを投稿する</h4>
+    <form method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" class="btn btn-outline-primary">コメント投稿</button>
+    </form>
+
+{% endblock %}

@@ -2,8 +2,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # トップページ（ファイル一覧とアップロードフォームを表示）
     path('', views.file_list_and_upload, name='file_list'),
     
-    # ここにダウンロード、コメント機能のURLを今後追加します
+    # ★ 詳細ページURLを追加
+    path('file/<int:pk>/', views.file_detail_and_comment, name='file_detail'),
+
+    # ★ ダウンロードURLを追加
+    # pk（Primary Key）でファイルオブジェクトを一意に特定
+    path('download/<int:pk>/', views.file_download, name='file_download'),
 ]

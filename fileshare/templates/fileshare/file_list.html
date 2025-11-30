@@ -1,25 +1,53 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>ファイルアップロード</h2>
+    <h4>ファイルアップロード</h4>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">アップロード</button>
+        <button type="submit" class="btn btn-outline-primary">アップロード</button>
     </form>
 
     <hr>
 
-    <h2>アップロード済みファイル一覧</h2>
-    {% for file in files %}
-        <div>
-            <p><strong>ファイル名:</strong> <a href="{{ file.file.url }}">{{ file.file.name }}</a></p>
-            <p><strong>説明:</strong> {{ file.description }}</p>
-            <p><strong>アップロード者:</strong> {{ file.uploaded_by.username }}</p>
-            <p><strong>日時:</strong> {{ file.uploaded_at }}</p>
-            <hr>
+    <h4 class="mt-5 mb-3">アップロード済みファイル</h4>
+
+    {% if files %}
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="">
+                <tr>
+                    <th scope="col">ファイル名</th>
+                    <th scope="col" class="d-none d-sm-table-cell">説明</th>
+                    <th scope="col">ユーザー</th>
+                    <th scope="col" class="d-none d-md-table-cell">日時</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in files %}
+                <tr>
+                    <td>
+                        <a href="{% url 'file_detail' file.pk %}" class="link-primary">
+                            {{ file.file.name }}
+                        </a>
+                    </td>
+                    <td class="text-truncate d-none d-sm-table-cell" style="max-width: 250px;">
+                        {{ file.description }}
+                    </td>
+                    <td>
+                        {{ file.uploaded_by.username }}
+                    </td>
+                    <td class="text-muted d-none d-md-table-cell">
+                        {{ file.uploaded_at|date:"Y/m/d H:i" }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            まだファイルがアップロードされていません。
         </div>
-    {% empty %}
-        <p>まだファイルがアップロードされていません。</p>
-    {% endfor %}
+    {% endif %}
 {% endblock %}
