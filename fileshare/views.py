@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, FileResponse
 
 from .models import UploadedFile, FileComment
 from .forms import FileUploadForm, CommentForm
+from django.contrib import messages
+import os
+from urllib.parse import quote # URLエンコードのために import します
 
 @login_required
 # ファイル一覧とアップロードを処理するビュー
@@ -57,11 +60,18 @@ def file_download(request, pk):
     if not can_download:
         # 権限がない場合は404エラー（存在しないファイルとして扱う）
         raise Http404("このファイルにアクセスする権限がありません。")
+    # ... (権限チェック終わり) ...
 
-    # ファイルの配信処理（実際にはファイルシステムから読み込む）
-    # DjangoのFileFieldのopenとread機能を利用
-    response = HttpResponse(file_obj.file, content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{file_obj.file.name}"'
+    original_filename = os.path.basename(file_obj.file.name)
+    encoded_filename = quote(original_filename)
+
+    response = FileResponse(file_obj.file, as_attachment=True)
+    response['Content-Disposition'] = (
+        f"attachment; filename=\"download\"; filename*=UTF-8''{encoded_filename}"
+    )
+    return response
+
+    
     return response
 
 @login_required
@@ -100,3 +110,29 @@ def file_detail_and_comment(request, pk):
         'comment_form': comment_form,
     }
     return render(request, 'fileshare/file_detail.html', context)
+
+@login_required # ログインしているユーザーのみが削除できるようにする
+def file_delete(request, pk):
+    # pkに基づいてファイルを検索。見つからなければ404エラー
+    file_to_delete = get_object_or_404(UploadedFile, pk=pk)
+
+    # セキュリティ考慮事項: アップロードしたユーザーのみが削除できるかチェックする
+    if file_to_delete.uploaded_by != request.user:
+        messages.error(request, "他のユーザーがアップロードしたファイルを削除することはできません。")
+        return redirect('file_list') # ファイル一覧画面のURL名に置き換えてください
+
+    if request.method == 'POST':
+        # データベースからレコードと関連するストレージ上のファイルの両方を削除
+        file_to_delete.delete()
+        messages.success(request, f'ファイル "{file_to_delete.file.name}" は正常に削除されました。')
+        
+        # 削除後にファイル一覧画面（または適切な画面）にリダイレクト
+        return redirect('file_list') # ファイル一覧画面のURL名に置き換えてください
+    
+    # POSTリクエストでない場合は、通常は削除確認画面を表示しますが、
+    # シンプルなアプリでは直接一覧へリダイレクトする場合もあります。
+    # 削除確認を挟む場合は、ここを修正し、対応するテンプレートを作成してください。
+    
+    # 今回は一覧画面の削除ボタンから直接POST送信することを想定し、
+    # 確認画面をスキップして、ファイル一覧に戻します。
+    return redirect('file_list')

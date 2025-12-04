@@ -10,4 +10,7 @@ urlpatterns = [
     # ★ ダウンロードURLを追加
     # pk（Primary Key）でファイルオブジェクトを一意に特定
     path('download/<int:pk>/', views.file_download, name='file_download'),
+
+    path('delete/<int:pk>/', views.file_delete, name='file_delete'),
+    # または class-based viewを使うなら path('delete/<int:pk>/', views.FileDeleteView.as_view(), name='file_delete'),
 ]
